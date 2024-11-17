@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const qs = require('qs');
+const cors = require('cors');
 
 const tiksave = {
   getData: async (url) => {
@@ -49,21 +50,32 @@ const tiksave = {
   }
 };
 
-module.exports = async (req, res) => {
-  const { url } = req.query;
+// Enable CORS
+const handler = async (req, res) => {
+  const corsOptions = {
+    origin: '*', // Allow all origins or specify a domain like 'https://your-website.com'
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
 
-  if (!url) {
-    return res.status(400).json({ success: false, message: 'URL tidak boleh kosong.' });
-  }
+  cors(corsOptions)(req, res, async () => {
+    const { url } = req.query;
 
-  try {
-    const { videoData, audioUrl } = await tiksave.download(url);
-    res.status(200).json({
-      success: true,
-      data: videoData,
-      audioUrl
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    if (!url) {
+      return res.status(400).json({ success: false, message: 'URL tidak boleh kosong.' });
+    }
+
+    try {
+      const { videoData, audioUrl } = await tiksave.download(url);
+      res.status(200).json({
+        success: true,
+        data: videoData,
+        audioUrl
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 };
+
+
