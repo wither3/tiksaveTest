@@ -3,6 +3,13 @@ const cheerio = require('cheerio');
 const qs = require('qs');
 const cors = require('cors');
 
+// Middleware untuk CORS
+const corsMiddleware = cors({
+  origin: '*', // Anda bisa mengganti '*' dengan domain yang lebih spesifik jika perlu
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+});
+
 const tiksave = {
   getData: async (url) => {
     const apiUrl = 'https://tiksave.io/api/ajaxSearch';
@@ -50,15 +57,10 @@ const tiksave = {
   }
 };
 
-// Enable CORS
-const handler = async (req, res) => {
-  const corsOptions = {
-    origin: '*', // Allow all origins or specify a domain like 'https://your-website.com'
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-
-  cors(corsOptions)(req, res, async () => {
+// Serverless handler untuk Vercel
+module.exports = async (req, res) => {
+  // Menambahkan CORS untuk menerima permintaan dari origin manapun
+  corsMiddleware(req, res, async () => {
     const { url } = req.query;
 
     if (!url) {
@@ -77,5 +79,3 @@ const handler = async (req, res) => {
     }
   });
 };
-
-
