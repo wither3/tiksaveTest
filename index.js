@@ -1,11 +1,6 @@
-const express = require('express');
-const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const qs = require('qs');
-
-const app = express();
-app.use(cors()); // Menambahkan middleware CORS
 
 const tiksave = {
   getData: async (url) => {
@@ -54,8 +49,17 @@ const tiksave = {
   }
 };
 
-app.get('/download', async (req, res) => {
+module.exports = async (req, res) => {
   const { url } = req.query;
+
+  // Menangani permintaan CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end(); // CORS Pre-flight response
+  }
 
   if (!url) {
     return res.status(400).json({ success: false, message: 'URL tidak boleh kosong.' });
@@ -71,9 +75,4 @@ app.get('/download', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server berjalan di http://localhost:${port}`);
-});
+};
