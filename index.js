@@ -3,12 +3,16 @@ const cheerio = require('cheerio');
 const qs = require('qs');
 const cors = require('cors');
 
-// Middleware untuk CORS
-const corsMiddleware = cors({
-  origin: '*', // Anda bisa mengganti '*' dengan domain yang lebih spesifik jika perlu
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
+// Membuat CORS middleware function
+const corsMiddleware = (req, res) => {
+  const corsOptions = {
+    origin: '*', // Bisa diganti dengan domain yang lebih spesifik
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+
+  cors(corsOptions)(req, res, () => {});
+};
 
 const tiksave = {
   getData: async (url) => {
@@ -57,25 +61,26 @@ const tiksave = {
   }
 };
 
-// Serverless handler untuk Vercel
+// Menangani request API dengan CORS middleware
 module.exports = async (req, res) => {
-  // Menambahkan CORS untuk menerima permintaan dari origin manapun
-  corsMiddleware(req, res, async () => {
-    const { url } = req.query;
+  // Menambahkan CORS
+  corsMiddleware(req, res);
 
-    if (!url) {
-      return res.status(400).json({ success: false, message: 'URL tidak boleh kosong.' });
-    }
+  const { url } = req.query;
 
-    try {
-      const { videoData, audioUrl } = await tiksave.download(url);
-      res.status(200).json({
-        success: true,
-        data: videoData,
-        audioUrl
-      });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  });
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'URL tidak boleh kosong.' });
+  }
+
+  try {
+    const { videoData, audioUrl } = await tiksave.download(url);
+    res.status(200).json({
+      success: true,
+      data: videoData,
+      audioUrl
+    });
+  } catch (error) {
+    console.error(error);  // Mencatat error agar bisa dilihat di log Vercel
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
