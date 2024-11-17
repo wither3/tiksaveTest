@@ -1,18 +1,11 @@
+const express = require('express');
+const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const qs = require('qs');
-const cors = require('cors');
 
-// Membuat CORS middleware function
-const corsMiddleware = (req, res) => {
-  const corsOptions = {
-    origin: '*', // Bisa diganti dengan domain yang lebih spesifik
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-
-  cors(corsOptions)(req, res, () => {});
-};
+const app = express();
+app.use(cors()); // Menambahkan middleware CORS
 
 const tiksave = {
   getData: async (url) => {
@@ -61,11 +54,7 @@ const tiksave = {
   }
 };
 
-// Menangani request API dengan CORS middleware
-module.exports = async (req, res) => {
-  // Menambahkan CORS
-  corsMiddleware(req, res);
-
+app.get('/download', async (req, res) => {
   const { url } = req.query;
 
   if (!url) {
@@ -80,7 +69,11 @@ module.exports = async (req, res) => {
       audioUrl
     });
   } catch (error) {
-    console.error(error);  // Mencatat error agar bisa dilihat di log Vercel
     res.status(500).json({ success: false, message: error.message });
   }
-};
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server berjalan di http://localhost:${port}`);
+});
