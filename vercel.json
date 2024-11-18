@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/tiktok.js",
+      "src": "index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/tiktok.js"
+      "dest": "/index.js"
     }
   ]
 }
