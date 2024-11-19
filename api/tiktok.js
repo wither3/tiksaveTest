@@ -30,6 +30,7 @@ const tiktokDl = async (url) => {
         let result = {
             nickname: res.author.nickname,
             nama: res.author.unique_id,
+            profile: `https://tikwm.com${res.author.avatar}`,
             region: res.region,
             soundTitle: res.music_info.title,
             soundAuthor: res.music_info.author,
